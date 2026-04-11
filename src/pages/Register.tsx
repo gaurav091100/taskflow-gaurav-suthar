@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { login as loginApi } from "../services/auth";
+import { register as registerApi } from "../services/auth";
 import { useAuth } from "../features/auth/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
-export default function Login() {
+const Register = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    email: "test@example.com",
-    password: "password123",
+    name: "",
+    email: "",
+    password: "",
   });
 
   const [error, setError] = useState("");
@@ -24,22 +25,25 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!form.email || !form.password) {
-      setError("Email and password are required");
+    if (!form.name || !form.email || !form.password) {
+      setError("All fields are required");
       return;
     }
 
     try {
       setLoading(true);
 
-      const data = await loginApi(form.email, form.password);
+      const data = await registerApi(form.name, form.email, form.password);
 
-      login(data);
+      login(data); // auto login after register
       navigate("/");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      if (err.response?.status === 401) {
-        setError("Invalid email or password");
+      console.log("ERROR:", err);
+      console.log("RESPONSE:", err?.response);
+
+      if (err.response?.status === 400) {
+        setError(err.response?.data?.fields?.email || "Registration failed");
       } else {
         setError("Something went wrong");
       }
@@ -51,9 +55,18 @@ export default function Login() {
   return (
     <div style={styles.container}>
       <form onSubmit={handleSubmit} style={styles.card}>
-        <h2>Login</h2>
+        <h2>Register</h2>
 
         {error && <p style={styles.error}>{error}</p>}
+
+        <input
+          name="name"
+          type="text"
+          placeholder="Name"
+          value={form.name}
+          onChange={handleChange}
+          style={styles.input}
+        />
 
         <input
           name="email"
@@ -74,18 +87,19 @@ export default function Login() {
         />
 
         <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Creating account..." : "Register"}
         </button>
 
         <p style={{ fontSize: "14px" }}>
-          Don’t have an account? <Link to="/register">Register</Link>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </form>
     </div>
   );
-}
+};
 
-const styles: { [key: string]: React.CSSProperties } ={
+export default Register;
+const styles: { [key: string]: React.CSSProperties } = {
   container: {
     height: "100vh",
     display: "flex",
@@ -99,7 +113,7 @@ const styles: { [key: string]: React.CSSProperties } ={
     background: "#fff",
     width: "320px",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column", // ✅ now valid
     gap: "10px",
   },
   input: {
