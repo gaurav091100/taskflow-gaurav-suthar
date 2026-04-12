@@ -19,6 +19,8 @@ let projects = [
   },
 ];
 
+
+
 export const handlers = [
   // LOGIN
   http.post("http://localhost:4000/auth/login", async ({ request }) => {
@@ -94,5 +96,9 @@ export const handlers = [
     );
   }),
 
-  
+  // PROJECTS
+  http.get("http://localhost:4000/projects", () => {
+    return HttpResponse.json({ projects });
+  }), 
+
 ];
