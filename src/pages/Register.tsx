@@ -37,13 +37,12 @@ const Register = () => {
 
       login(data); // auto login after register
       navigate("/");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.log("ERROR:", err);
-      console.log("RESPONSE:", err?.response);
-
-      if (err.response?.status === 400) {
-        setError(err.response?.data?.fields?.email || "Registration failed");
+    } catch (err: unknown) {
+      const ax = err as {
+        response?: { status?: number; data?: { fields?: { email?: string } } };
+      };
+      if (ax.response?.status === 400) {
+        setError(ax.response?.data?.fields?.email || "Registration failed");
       } else {
         setError("Something went wrong");
       }

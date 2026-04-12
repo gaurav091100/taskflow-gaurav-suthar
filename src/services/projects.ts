@@ -1,27 +1,24 @@
 import { api } from "./api";
+import type { Project } from "../types/api";
 
-// Get all projects
-export const getProjects = async () => {
-  const { data } = await api.get("/projects");
+export const getProjects = async (): Promise<Project[]> => {
+  const { data } = await api.get<{ projects: Project[] }>("/projects");
   return data.projects;
 };
 
-// Get single project (optional but useful)
 export const getProjectById = async (id: string) => {
   const { data } = await api.get(`/projects/${id}`);
   return data;
 };
 
-// Create project
 export const createProject = async (payload: {
   name: string;
   description?: string;
 }) => {
-  const { data } = await api.post("/projects", payload);
+  const { data } = await api.post<Project>("/projects", payload);
   return data;
 };
 
-// Update project
 export const updateProject = async (
   id: string,
   payload: {
@@ -29,11 +26,10 @@ export const updateProject = async (
     description?: string;
   }
 ) => {
-  const { data } = await api.patch(`/projects/${id}`, payload);
+  const { data } = await api.patch<Project>(`/projects/${id}`, payload);
   return data;
 };
 
-// Delete project
 export const deleteProject = async (id: string) => {
   await api.delete(`/projects/${id}`);
 };
