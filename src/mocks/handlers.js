@@ -20,6 +20,17 @@ let projects = [
 ];
 
 
+  let mockTasks = [
+  {
+    id: "1",
+    title: "Design UI",
+    status: "todo",
+    priority: "high",
+    project_id: "1",
+    assignee_id: "1",
+    due_date: "2026-04-15",
+  },
+];
 
 export const handlers = [
   // LOGIN
@@ -101,4 +112,12 @@ export const handlers = [
     return HttpResponse.json({ projects });
   }), 
 
+  // TASKS
+  http.get("http://localhost:4000/projects/:id/tasks", ({ params }) => {
+    const tasks = mockTasks.filter(
+      (t) => t.project_id === params.id
+    );
+
+    return HttpResponse.json({ tasks });
+  }),
 ];
