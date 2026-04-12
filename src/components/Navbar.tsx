@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -10,27 +12,35 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  const displayName = user?.name?.trim() || "Signed in";
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "12px 20px",
-        borderBottom: "1px solid #ddd",
-        marginBottom: "20px",
-      }}
-    >
-      <h2 style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
-        TaskFlow
-      </h2>
-
-      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        <span>{user?.name}</span>
-
-        <button onClick={handleLogout}>Logout</button>
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <Button
+          variant="ghost"
+          className="shrink-0 px-2 text-base font-semibold sm:text-lg"
+          onClick={() => navigate("/")}
+        >
+          TaskFlow
+        </Button>
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <span
+            className="truncate text-sm text-muted-foreground sm:max-w-48 lg:max-w-xs"
+            title={displayName}
+          >
+            {displayName}
+          </span>
+          <Separator
+            orientation="vertical"
+            className="hidden h-6 sm:block"
+          />
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            Log out
+          </Button>
+        </div>
       </div>
-    </div>
+    </header>
   );
 };
 
