@@ -20,15 +20,18 @@ let projects = [
 ];
 
 
-  let mockTasks = [
+let mockTasks = [
   {
     id: "1",
     title: "Design UI",
+    description: "Homepage",
     status: "todo",
     priority: "high",
     project_id: "1",
     assignee_id: "1",
     due_date: "2026-04-15",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ];
 
@@ -177,5 +180,50 @@ export const handlers = [
     );
 
     return HttpResponse.json({ tasks });
+  }),
+
+  // CREATE TASK
+  http.post("http://localhost:4000/projects/:id/tasks", async ({ request, params }) => {
+    const body = await request.json();
+
+    const newTask = {
+      id: crypto.randomUUID(),
+      title: body.title,
+      description: body.description || "",
+      status: body.status || "todo",
+      priority: body.priority || "medium",
+      project_id: params.id,
+      assignee_id: body.assignee_id || "1",
+      due_date: body.due_date || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    mockTasks.push(newTask);
+
+    return HttpResponse.json(newTask, { status: 201 });
+  }),
+
+  // UPDATE TASK
+  http.patch("http://localhost:4000/tasks/:id", async ({ request, params }) => {
+    const body = await request.json();
+
+    const task = mockTasks.find((t) => t.id === params.id);
+
+    if (!task) {
+      return HttpResponse.json({ error: "not found" }, { status: 404 });
+    }
+
+    Object.assign(task, body, {
+      updated_at: new Date().toISOString(),
+    });
+
+    return HttpResponse.json(task);
+  }),
+
+  // DELETE TASK
+  http.delete("http://localhost:4000/tasks/:id", ({ params }) => {
+    mockTasks = mockTasks.filter((t) => t.id !== params.id);
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
