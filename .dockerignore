@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+mock-api/node_modules
+*.md
+.env
+.env.*
+!.env.example

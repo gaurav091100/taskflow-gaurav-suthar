@@ -1,73 +1,81 @@
-# React + TypeScript + Vite
+# TaskFlow (Frontend take-home)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. Overview
 
-Currently, two official plugins are available:
+TaskFlow is a small task-management UI: register or log in, browse projects, open a project, and manage tasks (create, edit, delete, change status). This submission targets a **Frontend Engineer** scope: there is **no production Go backend**; instead the repo ships a **mock REST API** (Express) for Docker/production builds and **MSW** for local development.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Stack:** React 19, TypeScript, Vite 8, React Router 7, TanStack Query, Axios, MSW 2. **UI:** custom components with inline styles (no external component library), responsive-friendly grid and flex layouts.
 
-## React Compiler
+## 2. Architecture decisions
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Dual API strategy:** In **development**, MSW intercepts calls to `VITE_API_BASE_URL` so you can run only `npm run dev`. In **production / Docker**, MSW is **not** started; the browser talks to the **mock-api** container (or any compatible server) on port 4000.
+- **Central config:** `src/config.ts` exports `API_BASE_URL` so Axios and MSW handlers stay aligned.
+- **React Query** for server state, mutations, and cache updates; **optimistic updates** only for quick **task status** changes (revert + message on failure).
+- **Task list filters** are passed to the API as `?status=` and `?assignee=`; `assignee=unassigned` is supported by the mock (extension beyond a bare UUID-only filter for better UX).
+- **Tradeoffs:** Assignee labels in the UI are hard-coded for the two seeded users (acceptable for a mock). Project/task ownership rules from the full-stack brief are not enforced server-side in the mock.
 
-## Expanding the ESLint configuration
+## 3. Running locally
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Prerequisites:** Docker Desktop (or Docker Engine + Compose).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone <your-repo-url>
+cd taskflow-gaurav-suthar
+cp .env.example .env
+docker compose up --build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **App:** http://localhost:3000 (configurable via `WEB_PORT` in `.env`)
+- **Mock API:** http://localhost:4000 (`MOCK_API_PORT`)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**Local development (no Docker):**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
+
+MSW runs automatically in dev and mocks the API at `VITE_API_BASE_URL` (default `http://localhost:4000`).
+
+## 4. Running migrations
+
+Not applicable. There is no PostgreSQL in this frontend-only submission. Data lives in memory in the mock API / MSW.
+
+## 5. Test credentials
+
+Seed / mock users (either MSW or `mock-api`):
+
+```
+Email:    test@example.com
+Password: password123
+```
+
+Additional user (same password): `jane@example.com` / `password123`.
+
+## 6. API reference
+
+Implements the assignment **Appendix A** shape (JSON bodies and status codes). Full request examples are in the Postman collection:
+
+- `postman/TaskFlow.postman_collection.json` — import into Postman; set `baseUrl` and paste a JWT from login into `token` (the mock accepts any bearer token).
+
+**Endpoints:** `POST /auth/register`, `POST /auth/login`, `GET|POST /projects`, `GET|PATCH|DELETE /projects/:id`, `GET|POST /projects/:id/tasks` (supports `status`, `assignee` query params), `PATCH|DELETE /tasks/:id`.
+
+## 7. What you’d do with more time
+
+- Replace the mock API with a real backend and generated OpenAPI client types.
+- Add **Vitest + MSW** integration tests for auth and task flows (beyond Postman).
+- Use a design system (e.g. shadcn) and a proper **modal/drawer** for task create/edit.
+- **Accessible** form validation messages per field, and toast notifications for mutations.
+- **Drag-and-drop** columns or dark mode (brief bonus items).
+
+---
+
+### Project layout
+
+| Path | Purpose |
+|------|---------|
+| `src/` | React app |
+| `src/mocks/` | MSW handlers (dev only) |
+| `mock-api/` | Express mock (Docker + optional `node mock-api/index.mjs`) |
+| `Dockerfile` | Multi-stage: Node build → nginx static |
+| `docker-compose.yml` | `api` + `web` |
