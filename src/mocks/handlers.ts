@@ -152,21 +152,6 @@ export const handlers = [
     return HttpResponse.json({ projects });
   }),
 
-  // http.get(`${API_BASE_URL}/projects/:id`, ({ params }) => {
-  //   const project = projects.find((p) => p.id === params.id);
-
-  //   if (!project) {
-  //     return HttpResponse.json({ error: "not found" }, { status: 404 });
-  //   }
-
-  //   const tasks = mockTasks.filter((t) => t.project_id === params.id);
-
-  //   return HttpResponse.json({
-  //     ...project,
-  //     tasks,
-  //   });
-  // }),
-
 
   http.get(`${API_BASE_URL}/projects/:id`, ({ params }) => {
     const project = projects.find((p) => p.id === params.id);
@@ -194,7 +179,6 @@ export const handlers = [
       name: project.name,
       description: project.description || "",
       owner_id: project.owner_id,
-      // created_at: project.created_at,
       tasks,
     });
   }),
@@ -242,8 +226,9 @@ export const handlers = [
     const url = new URL(request.url);
     const statusQ = url.searchParams.get("status") ?? undefined;
     const assigneeQ = url.searchParams.get("assignee") ?? undefined;
+    const pid = params.id as string;
 
-    let tasks = mockTasks.filter((t) => t.project_id === params.id);
+    let tasks = mockTasks.filter(() => pid === params.id);
 
     if (statusQ) {
       tasks = tasks.filter((t) => t.status === statusQ);
@@ -261,7 +246,6 @@ export const handlers = [
     `${API_BASE_URL}/projects/:id/tasks`,
     async ({ request }) => {
       const body = (await request.json()) as Record<string, unknown>;
-      // const pid = params.id as string;
 
       const rawAssignee = body.assignee_id;
       const assigneeId =
@@ -273,13 +257,9 @@ export const handlers = [
         id: crypto.randomUUID(),
         title: String(body.title ?? ""),
         description: String(body.description ?? ""),
-        // status: (body.status as Task["status"]) || "todo",
         priority: (body.priority as Task["priority"]) || "medium",
-        // project_id: pid,
         assignee_id: assigneeId,
         due_date: (body.due_date as string) || null,
-        // created_at: new Date().toISOString(),
-        // updated_at: new Date().toISOString(),
       };
 
       mockTasks.push(newTask);
