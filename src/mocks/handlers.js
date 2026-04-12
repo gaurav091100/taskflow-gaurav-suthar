@@ -112,6 +112,64 @@ export const handlers = [
     return HttpResponse.json({ projects });
   }), 
 
+  // GET SINGLE PROJECT (with tasks)
+  http.get("http://localhost:4000/projects/:id", ({ params }) => {
+    const project = projects.find((p) => p.id === params.id);
+
+    if (!project) {
+      return HttpResponse.json(
+        { error: "not found" },
+        { status: 404 }
+      );
+    }
+
+    const tasks = mockTasks.filter(
+      (t) => t.project_id === params.id
+    );
+
+    return HttpResponse.json({
+      ...project,
+      tasks,
+    });
+  }),
+
+  // CREATE PROJECT
+  http.post("http://localhost:4000/projects", async ({ request }) => {
+    const body = await request.json();
+
+    const newProject = {
+      id: crypto.randomUUID(),
+      ...body,
+      owner_id: "1",
+      created_at: new Date().toISOString(),
+    };
+
+    projects.push(newProject);
+
+    return HttpResponse.json(newProject, { status: 201 });
+  }),
+
+  // UPDATE PROJECT
+  http.patch("http://localhost:4000/projects/:id", async ({ request, params }) => {
+    const body = await request.json();
+
+    const project = projects.find((p) => p.id === params.id);
+
+    if (!project) {
+      return HttpResponse.json({ error: "project not found" }, { status: 404 });
+    }
+
+    Object.assign(project, body);
+
+    return HttpResponse.json(project)
+  }),
+
+  // DELETE PROJECT
+  http.delete("http://localhost:4000/projects/:id", ({ params }) => {
+    projects = projects.filter((p) => p.id !== params.id);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   // TASKS
   http.get("http://localhost:4000/projects/:id/tasks", ({ params }) => {
     const tasks = mockTasks.filter(
