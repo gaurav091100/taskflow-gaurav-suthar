@@ -1,7 +1,21 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { register as registerApi } from "../services/auth";
 import { useAuth } from "../features/auth/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { AuthLayout } from "@/components/layout/AuthLayout";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Register = () => {
   const { login } = useAuth();
@@ -32,9 +46,7 @@ const Register = () => {
 
     try {
       setLoading(true);
-
       const data = await registerApi(form.name, form.email, form.password);
-
       login(data); // auto login after register
       navigate("/");
     } catch (err: unknown) {
@@ -52,83 +64,75 @@ const Register = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.card}>
-        <h2>Register</h2>
-
-        {error && <p style={styles.error}>{error}</p>}
-
-        <input
-          name="name"
-          type="text"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          style={styles.input}
-        />
-
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          style={styles.input}
-        />
-
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          style={styles.input}
-        />
-
-        <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? "Creating account..." : "Register"}
-        </button>
-
-        <p style={{ fontSize: "14px" }}>
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
-      </form>
-    </div>
+    <AuthLayout>
+      <Card className="w-full shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl sm:text-2xl">Create account</CardTitle>
+          <CardDescription>
+            Register to start managing projects and tasks.
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error ? (
+              <Alert variant="destructive">
+                <AlertCircle />
+                <AlertTitle>Registration issue</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+            <div className="space-y-2">
+              <Label htmlFor="reg-name">Name</Label>
+              <Input
+                id="reg-name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                placeholder="Enter your name"
+                value={form.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reg-email">Email</Label>
+              <Input
+                id="reg-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="Enter your email"
+                value={form.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reg-password">Password</Label>
+              <Input
+                id="reg-password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Enter password"
+                value={form.password}
+                onChange={handleChange}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-4 sm:flex-row sm:justify-between mt-6">
+            <Button type="submit" className="w-full sm:w-auto" disabled={loading}>
+              {loading ? "Creating account…" : "Register"}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground sm:text-right">
+              Already have an account?{" "}
+              <Button variant="link" className="h-auto p-0" asChild>
+                <Link to="/login">Sign in</Link>
+              </Button>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </AuthLayout>
   );
-};
+}
 
 export default Register;
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f5f5f5",
-  },
-  card: {
-    padding: "2rem",
-    borderRadius: "8px",
-    background: "#fff",
-    width: "320px",
-    display: "flex",
-    flexDirection: "column", // ✅ now valid
-    gap: "10px",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px",
-    borderRadius: "4px",
-    background: "#000",
-    color: "#fff",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-    fontSize: "14px",
-  },
-};

@@ -1,9 +1,23 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { login as loginApi } from "../services/auth";
 import { useAuth } from "../features/auth/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { AuthLayout } from "@/components/layout/AuthLayout";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
-export default function Login() {
+const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -31,14 +45,12 @@ export default function Login() {
 
     try {
       setLoading(true);
-
       const data = await loginApi(form.email, form.password);
-
       login(data);
       navigate("/");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      if (err.response?.status === 401) {
+    } catch (err: unknown) {
+      const ax = err as { response?: { status?: number } };
+      if (ax.response?.status === 401) {
         setError("Invalid email or password");
       } else {
         setError("Something went wrong");
@@ -49,73 +61,63 @@ export default function Login() {
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.card}>
-        <h2>Login</h2>
-
-        {error && <p style={styles.error}>{error}</p>}
-
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          style={styles.input}
-        />
-
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          style={styles.input}
-        />
-
-        <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-
-        <p style={{ fontSize: "14px" }}>
-          Don’t have an account? <Link to="/register">Register</Link>
-        </p>
-      </form>
-    </div>
+    <AuthLayout>
+      <Card className="w-full shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl sm:text-2xl">Sign in</CardTitle>
+          <CardDescription>
+            Use your TaskFlow account to continue.
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error ? (
+              <Alert variant="destructive">
+                <AlertCircle />
+                <AlertTitle>Could not sign in</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+            <div className="space-y-2">
+              <Label htmlFor="login-email">Email</Label>
+              <Input
+                id="login-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="Enter your email"
+                value={form.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">Password</Label>
+              <Input
+                id="login-password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                value={form.password}
+                onChange={handleChange}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-4 sm:flex-row sm:justify-between mt-6">
+            <Button type="submit" className="w-full sm:w-auto" disabled={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground sm:text-right">
+              Don’t have an account?{" "}
+              <Button variant="link" className="h-auto p-0" asChild>
+                <Link to="/register">Register</Link>
+              </Button>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </AuthLayout>
   );
 }
 
-const styles: { [key: string]: React.CSSProperties } ={
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f5f5f5",
-  },
-  card: {
-    padding: "2rem",
-    borderRadius: "8px",
-    background: "#fff",
-    width: "320px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px",
-    borderRadius: "4px",
-    background: "#000",
-    color: "#fff",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-    fontSize: "14px",
-  },
-};
+export default Login;
