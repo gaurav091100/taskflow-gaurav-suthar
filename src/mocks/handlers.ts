@@ -1,13 +1,10 @@
 import { http, HttpResponse } from "msw";
 import { API_BASE_URL } from "../config";
-import type { Task } from "../types/api";
+import type { Task } from "@/features/tasks/types";
+import type { UserRecord } from "@/features/auth/types";
+import type { Project } from "@/features/projects/types";
 
-type UserRecord = {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-};
+
 
 const users: UserRecord[] = [
   {
@@ -24,7 +21,7 @@ const users: UserRecord[] = [
   },
 ];
 
-let projects = [
+let projects:Project[] = [
   {
     id: "1",
     name: "Demo Project",

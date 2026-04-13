@@ -1,5 +1,5 @@
-import { api } from "./api";
-import type { Task, TaskFilters, TaskUpdatePayload } from "../types/api";
+import { api } from "@/lib/api";
+import type { Task, TaskFilters, TaskUpdatePayload } from "./types";
 
 export const getTasksByProject = async (
   projectId: string,
