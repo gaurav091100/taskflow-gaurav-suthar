@@ -77,9 +77,16 @@ Ensures consistency between:
 
 ### Steps
 
+# Clone the repository
 git clone https://github.com/gaurav091100/taskflow-gaurav-suthar.git
+
+# Move into project directory
 cd taskflow
+
+# Setup environment variables
 cp .env.example .env
+
+# Start the application
 docker compose up --build
 
 ### 🌐 Access URLs
