@@ -34,6 +34,7 @@ TaskFlow is a small task-management UI: register or log in, browse projects, ope
 
 ## 4. Project Structure
 
+```bash
 src/
 ├── app/           # App-level setup (providers, routing)
 ├── assets/        # Static assets
@@ -46,6 +47,7 @@ src/
 
 mock-api/
 └── index.mjs        # Express mock backend (Docker runtime)
+```
 
 ---
 ## 5. Architecture decisions
