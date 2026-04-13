@@ -77,6 +77,7 @@ Ensures consistency between:
 
 ### Steps
 
+```bash
 # Clone the repository
 git clone https://github.com/gaurav091100/taskflow-gaurav-suthar.git
 
@@ -88,6 +89,7 @@ cp .env.example .env
 
 # Start the application
 docker compose up --build
+```
 
 ### 🌐 Access URLs
 - Frontend: http://localhost:3000
@@ -97,8 +99,10 @@ docker compose up --build
 
 ## 7. Running Locally (Without Docker)
 
+```bash
 npm install
 npm run dev
+```
 
 MSW runs automatically in development mode and mocks API requests.
 
